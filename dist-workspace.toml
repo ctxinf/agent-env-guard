@@ -19,6 +19,7 @@ install-updater = false
 tap = "ctxinf/homebrew-tap"
 # Publish jobs to run in CI
 publish-jobs = ["homebrew", "npm"]
-
-
-allow-dirty = ["ci"] # required to using environment secrets of gh
+# A namespace to use when publishing this package to the npm registry
+npm-scope = "@ctxinf"
+# Skip checking whether the specified configuration files are up to date
+allow-dirty = ["ci"]

@@ -350,8 +350,8 @@ jobs:
       - run: corepack enable
       - run: npm --version
       - run: |
-    echo "ACTIONS_ID_TOKEN_REQUEST_URL=$ACTIONS_ID_TOKEN_REQUEST_URL"
-    echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN exists? $([[ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]] && echo yes || echo no)"
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL=$ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN exists? $([[ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]] && echo yes || echo no)"
       - run: |
           for release in $(echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith("-npm-package.tar.gz")] | any)'); do
             pkg=$(echo "$release" | jq '.artifacts[] | select(endswith("-npm-package.tar.gz"))' --raw-output)

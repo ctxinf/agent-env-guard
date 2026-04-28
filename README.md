@@ -1,22 +1,50 @@
 # agent-env-guard
 
-Protect your secrets from showing up in plain text when agents like OpenClaw or Hermes run commands.
+Mask your secrets in bash tool_call results when using OpenClaw/Hermes/... .
 
 [简体中文](./README.zh-CN.md)
 
-`agent-env-guard` ships `maskrun`, a tiny CLI wrapper for developers and coding agents.
-
-It lets commands use your normal environment, then masks matched secret values from stdout and stderr.
-
 ```bash
-API_KEY=abc123xyz maskrun -- sh -c 'echo "key=$API_KEY"'
-# key=a*******z
+# Before:
+# The model thinks: "Why isn't this working? Let me check if API_KEY exists."
+echo $API_KEY
+sk-123454545677888 # secret exposed in a tool message
+
+# After:
+# The model thinks: "Why isn't this working? Let me check if API_KEY exists. The skill says to prefix commands with maskrun? OK."
+maskrun -- echo $API_KEY
+sk-1*************8
 ```
 
-## ✨ Why
+`agent-env-guard` ships `maskrun`, a tiny CLI wrapper for developers and coding agents.
 
-- 🤖 Agent-safe: reduce secret leaks in tool call results, logs, and transcripts.
-- 🧰 Simple: add one prefix before the raw command.
+It masks matched secret values from stdout and stderr.
+
+
+
+## ✨ Feature (only one)
+
+- 🤖 Agent-safe: mask secrets in exec outputs
+
+
+## ⚡ Usage
+
+### 1. Install `maskrun`
+
+Use one of the install commands below.
+
+### 2. Install the agent skill
+
+From your agent workspace:
+
+```bash
+npx skills add ctxinf/agent-env-guard
+```
+
+Then update `AGENTS.md` or the other agent instruction files to force the model to follow the skill.
+
+> The skill tells agents to wrap risky commands with `maskrun --`.
+
 
 ## 🚀 Install Latest
 
@@ -46,38 +74,6 @@ brew install ctxinf/tap/agent-env-guard
 npm install @ctxinf/agent-env-guard@latest
 ```
 
-## ⚡ Usage
-
-### 1. Install `maskrun`
-
-Use one of the install commands above.
-
-### 2. Install the agent skill
-
-From your agent workspace:
-
-```bash
-npx skills add ctxinf/agent-env-guard
-```
-
-Then update `AGENTS.md` or the other agent instruction files to force the model to follow the skill.
-
-> The skill tells agents to wrap risky commands with `maskrun --`.
-
-### 3. Run commands through `maskrun`
-
-```bash
-maskrun -- <command> [args...]
-```
-
-Examples:
-
-```bash
-maskrun -- cargo test
-maskrun -- npm run build
-maskrun -- curl "https://api.example.com?key=${API_KEY}"
-maskrun -- sh -c 'echo "$API_KEY"'
-```
 
 ## 👀 What It Does
 

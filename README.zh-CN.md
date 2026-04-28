@@ -1,22 +1,50 @@
 # agent-env-guard
 
-当 OpenClaw、Hermes 这类 agent 执行命令时，保护你的 secrets 不以明文出现在输出里。
+在使用 OpenClaw、Hermes 等工具时，对 bash tool_call 结果里的 secrets 做脱敏。
 
 [English](./README.md)
 
-`agent-env-guard` 提供 `maskrun`：一个给开发者和 coding agents 用的小型 CLI 包装器。
-
-它允许命令正常使用环境变量，然后从 stdout 和 stderr 中打码命中的 secret value。
-
 ```bash
-API_KEY=abc123xyz maskrun -- sh -c 'echo "key=$API_KEY"'
-# key=a*******z
+# Before:
+# 模型想："为什么不工作？我看看 API_KEY 是否存在。"
+echo $API_KEY
+sk-123454545677888 # secret 暴露在 tool message 中
+
+# After:
+# 模型想："为什么不工作？我看看 API_KEY 是否存在。skill 说要给命令加 maskrun 前缀？OK。"
+maskrun -- echo $API_KEY
+sk-1*************8
 ```
 
-## ✨ 为什么用
+`agent-env-guard` 提供 `maskrun`：一个给开发者和 coding agents 用的小型 CLI 包装器。
 
-- 🤖 Agent 安全：减少 tool call result、日志、transcript 里的 secret 泄露。
-- 🧰 足够简单：只需要在原始命令前加一个前缀。
+它会从 stdout 和 stderr 中打码命中的 secret value。
+
+
+
+## ✨ 特性（只有一个）
+
+- 🤖 Agent 安全：对 exec 输出里的 secrets 做脱敏
+
+
+## ⚡ 使用
+
+### 1. 安装 `maskrun`
+
+使用下面任意一种安装方式。
+
+### 2. 安装 agent skill
+
+在你的 agent workspace 中执行：
+
+```bash
+npx skills add ctxinf/agent-env-guard
+```
+
+然后更新 `AGENTS.md` 或你的 agent 指令文件，要求模型强制遵守这个 skill。
+
+> 这个 skill 会提示 agents：遇到有风险的命令时，使用 `maskrun --` 包一层。
+
 
 ## 🚀 安装最新版
 
@@ -46,38 +74,6 @@ brew install ctxinf/tap/agent-env-guard
 npm install @ctxinf/agent-env-guard@latest
 ```
 
-## ⚡ 使用
-
-### 1. 安装 `maskrun`
-
-使用上面的任意一种安装方式。
-
-### 2. 安装 agent skill
-
-在你的 agent workspace 中执行：
-
-```bash
-npx skills add ctxinf/agent-env-guard
-```
-
-然后更新 `AGENTS.md` 或你的 agent 指令文件，要求模型强制遵守这个 skill。
-
-> 这个 skill 会提示 agents：遇到可能泄露 secret 的命令时，使用 `maskrun --` 包一层。
-
-### 3. 用 `maskrun` 执行命令
-
-```bash
-maskrun -- <command> [args...]
-```
-
-示例：
-
-```bash
-maskrun -- cargo test
-maskrun -- npm run build
-maskrun -- curl "https://api.example.com?key=${API_KEY}"
-maskrun -- sh -c 'echo "$API_KEY"'
-```
 
 ## 👀 它做什么
 

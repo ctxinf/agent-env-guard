@@ -22,6 +22,8 @@ maskrun -- cargo test
 maskrun -- npm run build
 maskrun -- curl "https://api.example.com?key=${API_KEY}"
 maskrun -- sh -c 'echo "$API_KEY"'
+maskrun -- echo "$API_KEY"
+maskrun -- cat openclaw.json
 ```
 
 ## When To Wrap
@@ -62,20 +64,76 @@ maskrun -- cargo test -- --nocapture
 
 Do not rewrite the child command arguments to make masking work. `maskrun` filters stdout and stderr while preserving the child command's normal inherited environment and exit code.
 
-## Quoting
 
-Use normal shell quoting rules.
+## Installation
 
-Prefer single quotes around child shell snippets when secret expansion should happen inside the child process:
+If `maskrun` is not installed, check the latest installation instructions before running sensitive commands.
+
+Start from the GitHub repository or latest release page:
+
+- `https://github.com/ctxinf/agent-env-guard`
+- `https://github.com/ctxinf/agent-env-guard/releases/latest`
+
+Use the install method documented there for the current platform. Common options include:
 
 ```bash
-maskrun -- sh -c 'echo "$API_KEY"'
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/ctxinf/agent-env-guard/releases/latest/download/agent-env-guard-installer.sh | sh
+brew install ctxinf/tap/agent-env-guard
+npm install @ctxinf/agent-env-guard@latest
 ```
 
-Avoid this when the parent shell would expand the secret before `maskrun` starts:
+On Windows, use the PowerShell command from the latest release page.
+
+After installation, verify:
 
 ```bash
-maskrun -- sh -c "echo $API_KEY"
+maskrun --help
+```
+
+## Configuration
+
+`maskrun` uses a TOML config to decide which environment variable values should be masked.
+
+Rules match environment variable names, not output text patterns. When a variable name matches `exact`, `glob`, or `regex`, its value is masked by exact string replacement in stdout and stderr.
+
+Default config locations:
+
+- Linux / Unix: `$XDG_CONFIG_HOME/maskrun/config.toml` or `$HOME/.config/maskrun/config.toml`
+- macOS: `$HOME/Library/Application Support/maskrun/config.toml`
+- Windows: `%APPDATA%\maskrun\config.toml`
+
+Example config:
+
+```toml
+[filter]
+exact = [
+  "API_KEY",
+  "SECRET",
+  "PASSWORD",
+]
+
+glob = [
+  "*_KEY",
+  "*_TOKEN",
+  "*_SECRET",
+  "*_PASSWORD",
+]
+
+regex = [
+  "(?i)^.*password.*$",
+]
+```
+
+If the user needs to change masking rules, edit the default config file above or pass a project-specific config:
+
+```bash
+maskrun --config ./maskrun.toml -- <command> [args...]
+```
+
+Use `--verbose` to inspect which environment variable names matched without printing their raw values:
+
+```bash
+maskrun --verbose -- <command> [args...]
 ```
 
 ## Safety Boundary
@@ -83,20 +141,3 @@ maskrun -- sh -c "echo $API_KEY"
 Treat `maskrun` as output masking only.
 
 It does not sandbox the child process, block network access, prevent file writes, manage credentials, or stop the child command from reading environment variables. It reduces accidental exposure in terminal output, logs, and agent transcripts.
-
-## If Maskrun Is Missing
-
-If `maskrun` is unavailable, first check whether the current repository provides it.
-
-For this Rust project, build or run it with Cargo:
-
-```bash
-cargo build
-cargo run -- -- <command> [args...]
-```
-
-When installed, prefer the shorter production form:
-
-```bash
-maskrun -- <command> [args...]
-```

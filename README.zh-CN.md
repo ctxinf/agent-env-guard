@@ -45,6 +45,30 @@ npx skills add ctxinf/agent-env-guard
 
 > 这个 skill 会提示 agents：遇到有风险的命令时，使用 `maskrun --` 包一层。
 
+### (可选) 理想的使用方式
+
+安装 `maskrun` 后，直接在 `User.md`、`AGENTS.md` 或其他指令文件中加入类似下面的要求：
+
+````md
+## Requirements
+
+执行 Bash 命令，或执行任何会运行命令的 tool call（例如 Exec、Run）时，
+总是且必须使用 `maskrun --` wrapper。
+
+不用先读取 skill，直接使用即可。
+
+示例：
+
+```sh
+maskrun -- cargo test
+maskrun -- npm run build
+maskrun -- curl "https://api.example.com?key=${API_KEY}"
+maskrun -- sh -c 'echo "$API_KEY"'
+maskrun -- echo "$API_KEY"
+maskrun -- cat openclaw.json
+```
+````
+
 
 ## 🚀 安装最新版
 

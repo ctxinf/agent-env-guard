@@ -45,6 +45,28 @@ Then update `AGENTS.md` or the other agent instruction files to force the model 
 
 > The skill tells agents to wrap risky commands with `maskrun --`.
 
+### (Optional) Ideal Usage
+
+After installing `maskrun`, add a direct requirement to `User.md`, `AGENTS.md`, or another agent instruction file:
+
+````md
+## Requirements
+
+When running Bash (or any tool call that executes a command such as Exec or Run), always use the `maskrun --` wrapper.
+
+Use it directly. You do not need to read the skill first.
+
+Examples:
+
+```sh
+maskrun -- cargo test
+maskrun -- npm run build
+maskrun -- curl "https://api.example.com?key=${API_KEY}"
+maskrun -- sh -c 'echo "$API_KEY"'
+maskrun -- echo "$API_KEY"
+maskrun -- cat openclaw.json
+```
+````
 
 ## 🚀 Install Latest
 
